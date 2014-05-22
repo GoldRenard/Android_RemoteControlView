@@ -77,46 +77,45 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	/**
 	 * Хендлер изменения состояния
 	 */
-    @SuppressLint("HandlerLeak")
+	@SuppressLint("HandlerLeak")
 	private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case MSG_UPDATE_STATE:
-            	if (mClientGeneration == msg.arg1) {
-					updatePlayState(msg.arg2);
-				}
-                break;
-            case MSG_SET_METADATA:
-				if (mClientGeneration == msg.arg1) {
-					updateMetadata((Bundle) msg.obj);
-				}
-                break;
-            case MSG_SET_TRANSPORT_CONTROLS:
-                break;
-            case MSG_SET_ARTWORK:
-                if (mClientGeneration == msg.arg1) {
-                    if (mArtwork != null) {
-                    	mArtwork.recycle();
-                    }
-                    mArtwork = (Bitmap)msg.obj;
-            		mImage.setVisibility(mArtwork != null ? View.VISIBLE : View.GONE);
-            		if (mArtwork != null) {
-            			mImage.setImageBitmap(mArtwork);
-            		}
-                }
-                break;
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+				case MSG_UPDATE_STATE:
+					if (mClientGeneration == msg.arg1) {
+						updatePlayState(msg.arg2);
+					}
+					break;
+				case MSG_SET_METADATA:
+					if (mClientGeneration == msg.arg1) {
+						updateMetadata((Bundle) msg.obj);
+					}
+					break;
+				case MSG_SET_TRANSPORT_CONTROLS:
+					break;
+				case MSG_SET_ARTWORK:
+					if (mClientGeneration == msg.arg1) {
+						if (mArtwork != null) {
+							mArtwork.recycle();
+						}
+						mArtwork = (Bitmap)msg.obj;
+						mImage.setVisibility(mArtwork != null ? View.VISIBLE : View.GONE);
+						if (mArtwork != null) {
+							mImage.setImageBitmap(mArtwork);
+						}
+					}
+					break;
 
-            case MSG_SET_GENERATION_ID:
-                mClientGeneration = msg.arg1;
-                mClientIntent = (PendingIntent) msg.obj;
-                break;
-
-            }
-        }
-    };
+				case MSG_SET_GENERATION_ID:
+					mClientGeneration = msg.arg1;
+					mClientIntent = (PendingIntent) msg.obj;
+					break;
+			}
+		}
+	};
 	
-    /**
+	/**
      * Интерфейс удаленного управления
      * @author Renard Gold (Илья Егоров)
      */
@@ -128,7 +127,7 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 		}
 
 		public void setPlaybackState(int generationId, int state, long stateChangeTimeMs) {
-			Handler handler = mLocalHandler.get();
+		Handler handler = mLocalHandler.get();
 			if (handler != null) {
 				handler.obtainMessage(MSG_UPDATE_STATE, generationId, state).sendToTarget();
 			}
@@ -145,7 +144,7 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 			Handler handler = mLocalHandler.get();
 			if (handler != null) {
 				handler.obtainMessage(MSG_SET_TRANSPORT_CONTROLS, generationId, flags)
-						.sendToTarget();
+					.sendToTarget();
 			}
 		}
 
@@ -165,7 +164,7 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 		}
 
 		public void setCurrentClientId(int clientGeneration, PendingIntent mediaIntent,
-				boolean clearing) throws RemoteException {
+			boolean clearing) throws RemoteException {
 			Handler handler = mLocalHandler.get();
 			if (handler != null) {
 				handler.obtainMessage(MSG_SET_GENERATION_ID,
@@ -177,12 +176,12 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	/**
 	 * Листенер изменения настройки
 	 */
-    private ContentObserver mSettingsObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-        	setEnabled(Settings.System.getInt(mContext.getContentResolver(), ENABLE_SETTINGS, 1) == 1);
-        }
-    };
+	private ContentObserver mSettingsObserver = new ContentObserver(new Handler()) {
+		@Override
+		public void onChange(boolean selfChange) {
+			setEnabled(Settings.System.getInt(mContext.getContentResolver(), ENABLE_SETTINGS, 1) == 1);
+		}
+	};
 	
 	public RemoteControlView(Context context) {
 		super(context);
@@ -210,23 +209,23 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 		mAudioManager = ((AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE));
 		setEnabled(true);
 		mIRCD = new IRemoteControlDisplayWeak(mHandler);
-		
-	    setOrientation(LinearLayout.HORIZONTAL);
-	    setGravity(Gravity.TOP);
-		
+
+		setOrientation(LinearLayout.HORIZONTAL);
+		setGravity(Gravity.TOP);
+
 		mImage = new ImageView(mContext);
 		mImage.setLayoutParams(new LinearLayout.LayoutParams(getDimension(IMAGE_SIZE_DIP), getDimension(IMAGE_SIZE_DIP)));
 		mImage.setBackgroundColor(0xFF5C5C5C);
 		mImage.setVisibility(View.GONE);
-        addView(mImage);
-        
-        RelativeLayout mContainer = new RelativeLayout(mContext);
-        mContainer.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        mContainer.addView(getInfoView());
-        mContainer.addView(getDividerView());
-        mContainer.addView(getControlsView());
-        
-        addView(mContainer);
+		addView(mImage);
+
+		RelativeLayout mContainer = new RelativeLayout(mContext);
+		mContainer.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		mContainer.addView(getInfoView());
+		mContainer.addView(getDividerView());
+		mContainer.addView(getControlsView());
+
+		addView(mContainer);
 	}
 	
 	/**
@@ -244,24 +243,24 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	 */
 	@Override
 	protected void onAttachedToWindow() {
-	    super.onAttachedToWindow();
-	    
-	    if (!mEnabled) {
-	    	return;
-	    }
-	    
-	    if (!mAttached) {
-	    	mAudioManager.registerRemoteControlDisplay(mIRCD);
-	    }
-	    
-	    // При паузе даем 10 секунд на повторное отображение панели
-	    if (mCurrentPlayState == RemoteControlClient.PLAYSTATE_PAUSED && SystemClock.elapsedRealtime() - mStateTime <= 10000) {
-	    	setVisibility(View.VISIBLE);
-	    } else {
-	    	setVisibility(mAudioManager.isMusicActive() ? View.VISIBLE : View.GONE);
-	    }
+		super.onAttachedToWindow();
 
-	    mAttached = true;
+		if (!mEnabled) {
+			return;
+		}
+
+		if (!mAttached) {
+			mAudioManager.registerRemoteControlDisplay(mIRCD);
+		}
+
+		// При паузе даем 10 секунд на повторное отображение панели
+		if (mCurrentPlayState == RemoteControlClient.PLAYSTATE_PAUSED && SystemClock.elapsedRealtime() - mStateTime <= 10000) {
+			setVisibility(View.VISIBLE);
+		} else {
+			setVisibility(mAudioManager.isMusicActive() ? View.VISIBLE : View.GONE);
+		}
+
+		mAttached = true;
 	}
 
 	/**
@@ -269,16 +268,16 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	 */
 	@Override
 	protected void onDetachedFromWindow() {
-	    super.onDetachedFromWindow();
-	    if (mAttached) {
-		    mAudioManager.unregisterRemoteControlDisplay(mIRCD);
-		    mHandler.removeMessages(MSG_SET_GENERATION_ID);
-		    mHandler.removeMessages(MSG_SET_METADATA);
-		    mHandler.removeMessages(MSG_SET_TRANSPORT_CONTROLS);
-		    mHandler.removeMessages(MSG_UPDATE_STATE);
-	    }
-	    
-	    mAttached = false;
+		super.onDetachedFromWindow();
+		if (mAttached) {
+			mAudioManager.unregisterRemoteControlDisplay(mIRCD);
+			mHandler.removeMessages(MSG_SET_GENERATION_ID);
+			mHandler.removeMessages(MSG_SET_METADATA);
+			mHandler.removeMessages(MSG_SET_TRANSPORT_CONTROLS);
+			mHandler.removeMessages(MSG_UPDATE_STATE);
+		}
+
+		mAttached = false;
 	}
 	
 	/**
@@ -286,29 +285,29 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	 * @return Группа элементов
 	 */
 	public View getInfoView() {
-        LinearLayout root = new LinearLayout(mContext);
-        root.setOrientation(LinearLayout.VERTICAL);
-        
-        RelativeLayout.LayoutParams lParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        int m = getDimension(5);
-        lParams.setMargins(m, m, m, m);
-        root.setLayoutParams(lParams);
-        
-        root.addView(getDividerView());
-        
-        mSong = newInfoTextView(android.R.style.TextAppearance_Medium);
-        mSong.setText(STR_UNKNOWN);
-        root.addView(mSong);
-        
-        mArtist = newInfoTextView(android.R.style.TextAppearance_Small);
-        mArtist.setText(STR_UNKNOWN);
-        root.addView(mArtist);
-        
-        mAlbum = newInfoTextView(android.R.style.TextAppearance_Small);
-        mAlbum.setText(STR_UNKNOWN);
-        root.addView(mAlbum);
-        
-        return root;
+		LinearLayout root = new LinearLayout(mContext);
+		root.setOrientation(LinearLayout.VERTICAL);
+
+		RelativeLayout.LayoutParams lParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		int m = getDimension(5);
+		lParams.setMargins(m, m, m, m);
+		root.setLayoutParams(lParams);
+
+		root.addView(getDividerView());
+
+		mSong = newInfoTextView(android.R.style.TextAppearance_Medium);
+		mSong.setText(STR_UNKNOWN);
+		root.addView(mSong);
+
+		mArtist = newInfoTextView(android.R.style.TextAppearance_Small);
+		mArtist.setText(STR_UNKNOWN);
+		root.addView(mArtist);
+
+		mAlbum = newInfoTextView(android.R.style.TextAppearance_Small);
+		mAlbum.setText(STR_UNKNOWN);
+		root.addView(mAlbum);
+
+		return root;
 	}
 	
 	/**
@@ -316,14 +315,14 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	 * @return Разделитель
 	 */
 	public View getDividerView() {
-        ImageView mDivider = new ImageView(mContext);
-        RelativeLayout.LayoutParams lParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, getDimension(0.7f));
-        lParams.setMargins(0, 0, 0, getDimension(CONTROL_HEIGHT_DIP));
-        lParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        mDivider.setLayoutParams(lParams);
-        mDivider.setScaleType(ScaleType.CENTER_CROP);
-        mDivider.setImageDrawable(mContext.getResources().getDrawable(android.R.drawable.divider_horizontal_dark));
-        return mDivider;
+		ImageView mDivider = new ImageView(mContext);
+		RelativeLayout.LayoutParams lParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, getDimension(0.7f));
+		lParams.setMargins(0, 0, 0, getDimension(CONTROL_HEIGHT_DIP));
+		lParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+		mDivider.setLayoutParams(lParams);
+		mDivider.setScaleType(ScaleType.CENTER_CROP);
+		mDivider.setImageDrawable(mContext.getResources().getDrawable(android.R.drawable.divider_horizontal_dark));
+		return mDivider;
 	}
 	
 	/**
@@ -331,34 +330,33 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	 * @return Группа элементов
 	 */
 	public View getControlsView() {
-		
 		mPreviousDrawable = mContext.getResources().getDrawable(android.R.drawable.ic_media_previous);
 		mPlayDrawable = mContext.getResources().getDrawable(android.R.drawable.ic_media_play);
 		mPauseDrawable = mContext.getResources().getDrawable(android.R.drawable.ic_media_pause);
 		mNextDrawable = mContext.getResources().getDrawable(android.R.drawable.ic_media_next);
-		
-        LinearLayout root = new LinearLayout(mContext);
-        root.setOrientation(LinearLayout.HORIZONTAL);
-        RelativeLayout.LayoutParams lParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        lParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        root.setLayoutParams(lParams);
-        
-        root.setDividerDrawable(mContext.getResources().getDrawable(android.R.drawable.divider_horizontal_dark));
-        root.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
-        root.setDividerPadding(getDimension(5));
-		
-        mPrev = newControlImageButton();
-        mPrev.setImageDrawable(mPreviousDrawable);
-        root.addView(mPrev);
-        
-        mStart = newControlImageButton();
-        mStart.setImageDrawable(mPlayDrawable);
-        root.addView(mStart);
-        
-        mNext = newControlImageButton();
-        mNext.setImageDrawable(mNextDrawable);
-        root.addView(mNext);
-        
+
+		LinearLayout root = new LinearLayout(mContext);
+		root.setOrientation(LinearLayout.HORIZONTAL);
+		RelativeLayout.LayoutParams lParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		lParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+		root.setLayoutParams(lParams);
+
+		root.setDividerDrawable(mContext.getResources().getDrawable(android.R.drawable.divider_horizontal_dark));
+		root.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
+		root.setDividerPadding(getDimension(5));
+
+		mPrev = newControlImageButton();
+		mPrev.setImageDrawable(mPreviousDrawable);
+		root.addView(mPrev);
+
+		mStart = newControlImageButton();
+		mStart.setImageDrawable(mPlayDrawable);
+		root.addView(mStart);
+
+		mNext = newControlImageButton();
+		mNext.setImageDrawable(mNextDrawable);
+		root.addView(mNext);
+
 		return root;
 	}
 	
@@ -368,24 +366,24 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	 */
 	public ImageButton newControlImageButton() {
 		ImageButton mButton = new ImageButton(mContext, null, android.R.attr.borderlessButtonStyle);
-		
+
 		LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(getDimension(0), getDimension(CONTROL_HEIGHT_DIP));
 		lParams.weight = 1;
 		mButton.setLayoutParams(lParams);
 		int p = getDimension(6);
 		mButton.setPadding(p, p, p, p);
-		
+
 		mButton.setCropToPadding(true);
 		mButton.setScaleType(ScaleType.CENTER_INSIDE);
 		mButton.setOnClickListener(this);
 		mButton.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-            	// Используется для отправки ивента в родительский элемент
-            	mEvent = event;
-                return false;
-            }
-        });
-		
+		public boolean onTouch(View v, MotionEvent event) {
+			// Используется для отправки ивента в родительский элемент
+			mEvent = event;
+			return false;
+			}
+		});
+
 		return mButton;
 	}
 
@@ -395,13 +393,13 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	 * @return новый TextView
 	 */
 	public TextView newInfoTextView(int textAppearance) {
-        TextView mText = new TextView(mContext);
-        mText.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-        mText.setSingleLine(true);
-        mText.setEllipsize(TruncateAt.MARQUEE);
-        mText.setSelected(true);
-        mText.setTextAppearance(mContext, textAppearance);
-        return mText;
+		TextView mText = new TextView(mContext);
+		mText.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+		mText.setSingleLine(true);
+		mText.setEllipsize(TruncateAt.MARQUEE);
+		mText.setSelected(true);
+		mText.setTextAppearance(mContext, textAppearance);
+		return mText;
 	}
 	
 	/**
@@ -418,55 +416,55 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	 * Обработчик кнопок
 	 * @param v
 	 */
-    public void onClick(View v) {
-        int keyCode = -1;
-        if (v == mPrev) {
-            keyCode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
-        } else if (v == mNext) {
-            keyCode = KeyEvent.KEYCODE_MEDIA_NEXT;
-        } else if (v == mStart) {
-            keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
+	public void onClick(View v) {
+		int keyCode = -1;
+		if (v == mPrev) {
+			keyCode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
+		} else if (v == mNext) {
+			keyCode = KeyEvent.KEYCODE_MEDIA_NEXT;
+		} else if (v == mStart) {
+			keyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
 
-        }
-        if (keyCode != -1) {
-            sendMediaButtonClick(keyCode);
-        }
+		}
+		if (keyCode != -1) {
+			sendMediaButtonClick(keyCode);
+		}
 
-        // Нам нужно отправить ивент нажатия обратно к VolumePanel, чтобы
-        // тот сбросил таймаут
-    	ViewParent parent = getParent();
-    	if (parent != null && mEvent != null && parent instanceof LinearLayout) {
-    		LinearLayout ll = (LinearLayout)parent;
-	    	ll.dispatchTouchEvent(mEvent);
-    	}
-    }
+		// Нам нужно отправить ивент нажатия обратно к VolumePanel, чтобы
+		// тот сбросил таймаут
+		ViewParent parent = getParent();
+		if (parent != null && mEvent != null && parent instanceof LinearLayout) {
+			LinearLayout ll = (LinearLayout)parent;
+			ll.dispatchTouchEvent(mEvent);
+		}
+	}
 	
 	/**
 	 * Отправка медиа-кнопки
 	 * @param keyCode Код кнопки
 	 */
-    private void sendMediaButtonClick(int keyCode) {
-        if (mClientIntent == null) {
-            return;
-        }
-        KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
-        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        intent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
-        try {
-            mClientIntent.send(getContext(), 0, intent);
-        } catch (CanceledException e) {
-            e.printStackTrace();
-        }
+	private void sendMediaButtonClick(int keyCode) {
+		if (mClientIntent == null) {
+			return;
+		}
+		KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
+		Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+		intent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+		try {
+			mClientIntent.send(getContext(), 0, intent);
+		} catch (CanceledException e) {
+			e.printStackTrace();
+		}
 
-        keyEvent = new KeyEvent(KeyEvent.ACTION_UP, keyCode);
-        intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        intent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
-        try {
-            mClientIntent.send(getContext(), 0, intent);
-        } catch (CanceledException e) {
-            e.printStackTrace();
-        }
-    }
+		keyEvent = new KeyEvent(KeyEvent.ACTION_UP, keyCode);
+		intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+		intent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
+		try {
+			mClientIntent.send(getContext(), 0, intent);
+		} catch (CanceledException e) {
+			e.printStackTrace();
+		}
+	}
     
 	/* =========================================
 	 * 			RemoteDisplaySection
@@ -477,11 +475,10 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	 * @param state Состояние
 	 */
 	private void updatePlayState(int state) {
-		
-        if (state == mCurrentPlayState) {
-            return;
-        }
-		
+		if (state == mCurrentPlayState) {
+			return;
+		}
+
 		if (state == RemoteControlClient.PLAYSTATE_PLAYING && mStart != null) {
 			mStart.setImageDrawable(mPauseDrawable);
 		} else {
@@ -496,7 +493,6 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 	 * @param data Бандл с данными
 	 */
 	private void updateMetadata(Bundle data) {
-		
 		String artist = getMdString(data, MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST);
 		if (artist == null) {
 			artist = getMdString(data, MediaMetadataRetriever.METADATA_KEY_ARTIST);
@@ -504,7 +500,7 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 		if (artist == null) {
 			artist = STR_UNKNOWN;
 		}
-		
+
 		String title = getMdString(data, MediaMetadataRetriever.METADATA_KEY_TITLE);
 		if (title == null) {
 			title = STR_UNKNOWN;
@@ -514,7 +510,7 @@ public class RemoteControlView extends LinearLayout implements View.OnClickListe
 		if (album == null) {
 			album = STR_UNKNOWN;
 		}
-		
+
 		if ((artist != null) && (title != null)) {
 			mArtist.setText(artist);
 			mSong.setText(title);
